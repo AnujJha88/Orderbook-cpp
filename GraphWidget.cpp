@@ -2,7 +2,7 @@
 #include <algorithm>
 #include<numeric>
 
-std::vector<int> GraphUtils::NormalizeData(const std::vector<double>& data, int height){
+ std::vector<int> GraphUtils::NormalizeData(const std::vector<double>& data, int height){
     std::vector<int> normalized;
     if(data.empty()) return normalized;
 
@@ -22,18 +22,18 @@ std::vector<int> GraphUtils::NormalizeData(const std::vector<double>& data, int 
 }
 
 
-double GraphUtils::FindMin(const std::vector<double>& data){
+ double GraphUtils::FindMin(const std::vector<double>& data){
     if(data.empty()) return 0.0;
     return *std::min_element(data.begin(),data.end());
 }
 
-double GraphUtils::FindMax(const std::vector<double>& data){
+ double GraphUtils::FindMax(const std::vector<double>& data){
     if(data.empty()) return 0.0;
     return *std::max_element(data.begin(),data.end());
 }
 
-ftxui::Element GraphUtils::PlotLineGraph(const std::vector<double> &data,const std::string &title,int width, int height){
-    auto graph_func=[data,height](int graph_width)->std::vector<int>{
+ ftxui::Element GraphUtils::PlotLineGraph(const std::vector<double> &data,const std::string &title,int width, int height){
+    auto graph_func=[data,height](int graph_width,int graph_height)->std::vector<int>{
         if(data.empty()) return {};
 
         std::vector<double> sampled_data;
@@ -52,39 +52,39 @@ ftxui::Element GraphUtils::PlotLineGraph(const std::vector<double> &data,const s
         return NormalizeData(sampled_data,height);
     };
 
-    ftxui::Element graph=ftxui::graph(graph_func)|color(ftxui::Color::Cyan);
+    ftxui::Element graph=ftxui::graph(std::move(graph_func))|color(ftxui::Color::Cyan);
 
     if(!title.empty()){
-        return vbox(
+        return ftxui::vbox(
             {
-                text(title)|bold|center,
-                separator(),
-                graph|ftxui::size(HEIGHT,EQUAL,height)
+                ftxui::text(title)|ftxui::bold|ftxui::center,
+                ftxui::separator(),
+                graph|ftxui::size(ftxui::HEIGHT,ftxui::EQUAL,height)
             }
         );
     }
     return graph;
 }
 
-ftxui::Element GraphUtils::PlotBarGraph(const std::vector<std::pair<std::string, double>>& data,
+ ftxui::Element GraphUtils::PlotBarGraph(const std::vector<std::pair<std::string, double>>& data,
                                 const std::string& title){
 
 
     ftxui::Elements bars;
 
     if(!title.empty()){
-        bars.push_back(text(title)|bold|center);
-        bars.push_back(separator());
+        bars.push_back(ftxui::text(title)|ftxui::bold|ftxui::center);
+        bars.push_back(ftxui::separator());
     }
 
     if(!data.empty()){
-        return vbox(
+        return ftxui::vbox(
         {
-                text(title)|bold|center,
-                separator(),
-                text("No data available")|center
+                ftxui::text(title)|ftxui::bold|ftxui::center,
+                ftxui::separator(),
+                ftxui::text("No data available")|ftxui::center
             }
-        ) | border;
+        ) | ftxui::border;
     }
     double max_val=0;
     for const auto& pair:data){
@@ -96,28 +96,28 @@ ftxui::Element GraphUtils::PlotBarGraph(const std::vector<std::pair<std::string,
     for(const auto& [label,value]:data){
         double ratio=value/max_val;
         bars.push_back(
-            hbox(
+            ftxui::hbox(
                 {
-                    text(label+":")|flex(1),
-                    gauge(static_cast<float>(ratio))|color(value >= 0 ? ftxui::Color::Green : ftxui::Color::Red)|flex(3),
-                    text(" "+std::to_string(static_cast<int>(value)))|flex(1)
+                    ftxui::text(label+":")|flex(1),
+                    ftxui::gauge(static_cast<float>(ratio))|color(value >= 0 ? ftxui::Color::Green : ftxui::Color::Red)|ftxui::flex(3),
+                    ftxui::text(" "+std::to_string(static_cast<int>(value)))|ftxui::flex(1)
                 }
             )
         );
     }
 
-    return vbox({
-        text(title) | bold | center,
-        separator(),
-        vbox(std::move(bars))
-    }) | border;
+    return ftxui::vbox({
+        ftxui::text(title) | ftxui::bold | ftxui::center,
+        ftxui::separator(),
+        ftxui::vbox(std::move(bars))
+    }) | ftxui::border;
 
 }
 
 
-ftxui::Element GraphUtils::PlotPriceMovement(const std::vector<double>& prices,const std::string& title){
+ ftxui::Element GraphUtils::PlotPriceMovement(const std::vector<double>& prices,const std::string& title){
     if(prices.empty()){
-        return text("No price data available")|center|border;
+        return ftxui::text("No price data available")|ftxui::center|ftxui::border;
     }
 
     double curr=prices.back();
@@ -128,18 +128,18 @@ ftxui::Element GraphUtils::PlotPriceMovement(const std::vector<double>& prices,c
 
     //now to add some more price info
 
-    return vbox({
+    return ftxui::vbox({
         graph,
-        separator(),
-        hbox({
-            text("Current: $"+std::to_string(static_cast<int>(curr)))|flex(1),
-            text("Min: $"+std::to_string(static_cast<int>(min_price)))|flex(1),
-            text("Max: $"+std::to_string(static_cast<int>(max_price)))| flex(1)
+        ftxui::separator(),
+        ftxui::hbox({
+            ftxui::text("Current: $"+std::to_string(static_cast<int>(curr)))|ftxui::flex(1),
+            ftxui::text("Min: $"+std::to_string(static_cast<int>(min_price)))|ftxui::flex(1),
+             ftxui::text("Max: $"+std::to_string(static_cast<int>(max_price)))|ftxui:: flex(1)
         })
-    })|border;
+    })|ftxui::border;
 }
 
-ftxui::Element PlotPositionSizes(const std::unordered_map<std::string,double>& positions){
+ ftxui::Element PlotPositionSizes(const std::unordered_map<std::string,double>& positions){
     std::vector<std::pair<std::string,double>> data;
     for(auto const& [instr,amt]:positions){
         data.push_back({instr,amt});
@@ -147,7 +147,7 @@ ftxui::Element PlotPositionSizes(const std::unordered_map<std::string,double>& p
     return PlotBarGraph(data,"Current Positions");
 }
 
-ftxui::Element GraphUtils::PlotOrderSizeDistribution(const std::vector<double>& order_sizes){
+ ftxui::Element GraphUtils::PlotOrderSizeDistribution(const std::vector<double>& order_sizes){
     return PlotLineGraph(order_sizes,"Order Size Distribution",50,8);
 
 }
