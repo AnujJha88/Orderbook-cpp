@@ -77,7 +77,7 @@
         bars.push_back(ftxui::separator());
     }
 
-    if(!data.empty()){
+    if(data.empty()){
         return ftxui::vbox(
         {
                 ftxui::text(title)|ftxui::bold|ftxui::center,
@@ -87,7 +87,7 @@
         ) | ftxui::border;
     }
     double max_val=0;
-    for const auto& pair:data){
+    for (const auto& pair:data){
         if(pair.second>max_val) max_val=pair.second;
     }
 
@@ -98,9 +98,10 @@
         bars.push_back(
             ftxui::hbox(
                 {
-                    ftxui::text(label+":")|flex(1),
-                    ftxui::gauge(static_cast<float>(ratio))|color(value >= 0 ? ftxui::Color::Green : ftxui::Color::Red)|ftxui::flex(3),
-                    ftxui::text(" "+std::to_string(static_cast<int>(value)))|ftxui::flex(1)
+                    ftxui::text(label+":")|ftxui::flex,
+
+                    ftxui::gauge(static_cast<float>(ratio))|color(value >= 0 ? ftxui::Color::Green : ftxui::Color::Red)|ftxui::flex,
+                    ftxui::text(" "+std::to_string(static_cast<int>(value)))|ftxui::flex
                 }
             )
         );
@@ -132,14 +133,14 @@
         graph,
         ftxui::separator(),
         ftxui::hbox({
-            ftxui::text("Current: $"+std::to_string(static_cast<int>(curr)))|ftxui::flex(1),
-            ftxui::text("Min: $"+std::to_string(static_cast<int>(min_price)))|ftxui::flex(1),
-             ftxui::text("Max: $"+std::to_string(static_cast<int>(max_price)))|ftxui:: flex(1)
+            ftxui::text("Current: $"+std::to_string(static_cast<int>(curr)))|ftxui::flex,
+            ftxui::text("Min: $"+std::to_string(static_cast<int>(min_price)))|ftxui::flex,
+             ftxui::text("Max: $"+std::to_string(static_cast<int>(max_price)))|ftxui:: flex
         })
     })|ftxui::border;
 }
 
- ftxui::Element PlotPositionSizes(const std::unordered_map<std::string,double>& positions){
+ ftxui::Element GraphUtils::PlotPositionSizes(const std::unordered_map<std::string,double>& positions){
     std::vector<std::pair<std::string,double>> data;
     for(auto const& [instr,amt]:positions){
         data.push_back({instr,amt});

@@ -58,7 +58,7 @@ void on_open(websocketpp::connection_hdl hdl, client* c) {
         {"jsonrpc","2.0"},
         {"id",1001},
         {"method","public/set_heartbeat"},
-        {"params",{{"interval","60"}}}
+        {"params",{{"interval",60}}}
 
     };
     c->send(hdl,heartbeat_msg.dump(),websocketpp::frame::opcode::text,ec);

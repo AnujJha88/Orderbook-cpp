@@ -9,7 +9,7 @@ LDFLAGS = -lboost_system -lboost_thread -lssl -lcrypto -pthread
 INCLUDES = -I./FTXUI/include -I./websocketpp -I./json
 LIB_DIRS = -L./FTXUI/build
 LIBS = -lftxui-component -lftxui-dom -lftxui-screen
-SOURCES = orderbook.cpp Authenticator.cpp OrderManager.cpp Order.cpp menu.cpp
+SOURCES = orderbook.cpp Authenticator.cpp OrderManager.cpp Order.cpp menu.cpp GraphWidget.cpp
 TARGET = trading_app
 
 # Default target

@@ -142,8 +142,8 @@ bool OrderManager::processApiResponse(const std::string &response)
     try
     {
         auto jsonResponse = nlohmann::json::parse(response);
-        if (json.contains("method") && json["method"] == "heartbeat") {
-            if (json.contains("params") && json["params"]["type"] == "test_request") {
+        if (jsonResponse.contains("method") && jsonResponse["method"] == "heartbeat") {
+            if (jsonResponse.contains("params") && jsonResponse["params"]["type"] == "test_request") {
                 nlohmann::json test_resp = {
                     {"jsonrpc", "2.0"}, {"id", 1002}, {"method", "public/test"}
                 };
@@ -160,7 +160,7 @@ bool OrderManager::processApiResponse(const std::string &response)
                 std::lock_guard<std::mutex> lock(historyMutex);
                 priceHistory.push_back(price);
                  if (priceHistory.size() > MAX_HISTORY) {
-                    priceHistory.pop_front();
+                    priceHistory.erase(priceHistory.begin());
                 }
                 return true;
             }
