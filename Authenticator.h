@@ -11,6 +11,9 @@
 #include <unordered_map>
 #include <vector>
 #include "common.h"
+#include<cstdlib>
+
+typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
 
 class Authenticator {
 private:
