@@ -5,6 +5,9 @@
 #include <nlohmann/json.hpp>
 #include "Order.h"
 #include "common.h"
+#include<vector>
+#include<mutex>
+
 // OrderManager class
 class OrderManager
 {
