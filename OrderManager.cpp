@@ -142,6 +142,36 @@ bool OrderManager::processApiResponse(const std::string &response)
     try
     {
         auto jsonResponse = nlohmann::json::parse(response);
+        if (json.contains("method") && json["method"] == "heartbeat") {
+            if (json.contains("params") && json["params"]["type"] == "test_request") {
+                nlohmann::json test_resp = {
+                    {"jsonrpc", "2.0"}, {"id", 1002}, {"method", "public/test"}
+                };
+                sendApiRequest(test_resp.dump());
+                return true;
+            }
+        }
+
+        if(jsonResponse.contains("method")&&jsonResponse["method"]=="subscription"){
+            auto params = jsonResponse["params"];
+            if(params.contains("data")&& params["data"].contains("last_price")){
+                double price=params["data"]["last_price"].get<double>();
+
+                std::lock_guard<std::mutex> lock(historyMutex);
+                priceHistory.push_back(price);
+                 if (priceHistory.size() > MAX_HISTORY) {
+                    priceHistory.pop_front();
+                }
+                return true;
+            }
+        }
+
+        if (jsonResponse.contains("result") && jsonResponse["result"].contains("last_price")) {
+            double price = jsonResponse["result"]["last_price"].get<double>();
+            std::lock_guard<std::mutex> lock(historyMutex);
+            priceHistory.push_back(price);
+            return true;
+        }
 
         if (jsonResponse.contains("result"))
         {

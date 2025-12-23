@@ -23,6 +23,11 @@ private:
 
     void sendApiRequest(const std::string &requestJson);
 
+    std::vector<double> priceHistory;
+    std::mutex historyMutex;
+    const size_t MAX_HISTORY=100;
+
+
 public:
     OrderManager(client *clientPtr, websocketpp::connection_hdl hdl);
 
@@ -73,4 +78,9 @@ public:
 
     // New method: Unsubscribe from all channels
     void unsubscribeAll();
+
+    std::vector<double> getPriceHistory(){
+        std::lock_guard<std::mutex> lock(historyMutex);
+        return priceHistory;
+    }
 };

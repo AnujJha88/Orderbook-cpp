@@ -36,6 +36,8 @@ void on_open(websocketpp::connection_hdl hdl, client* c) {
     websocketpp::lib::error_code ec;
     client::connection_ptr con = c->get_con_from_hdl(hdl, ec);
 
+
+
     if (ec) {
         std::cout << "Failed to get connection pointer: " << ec.message() << std::endl;
         return;
@@ -51,12 +53,26 @@ void on_open(websocketpp::connection_hdl hdl, client* c) {
         connectionOpen = true;
     }
     cv.notify_one();
+
+    nlohmann::json heartbeat_msg={
+        {"jsonrpc","2.0"},
+        {"id",1001},
+        {"method","public/set_heartbeat"},
+        {"params",{{"interval","60"}}}
+
+    };
+    c->send(hdl,heartbeat_msg.dump(),websocketpp::frame::opcode::text,ec);
+
 }
 
 void on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
     std::string payload = msg->get_payload();
     try {
         auto jsonData = nlohmann::json::parse(payload);
+
+        if(jsonData.contains("method")){
+            manager->processApiResponse(payload);
+        }
 
         if (jsonData.contains("result")) {
             if (manager) {
@@ -141,7 +157,7 @@ int main(int argc, char* argv[]) {
             std::unique_lock<std::mutex> lock(mtx);
             cv.wait(lock, [] { return connectionOpen; });
             lock.unlock();
-            
+
             menu.showInteractiveMenu(manager);
             websocketpp::lib::error_code ec;
 
