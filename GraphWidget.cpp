@@ -18,7 +18,7 @@ std::vector<int> GraphUtils::NormalizeData(const std::vector<double>& data, int 
     }
     return normalized;
 
-    
+
 }
 
 
@@ -59,29 +59,33 @@ ftxui::Element GraphUtils::PlotLineGraph(const std::vector<double> &data,const s
             {
                 text(title)|bold|center,
                 separator(),
-                graph
+                graph|ftxui::size(HEIGHT,EQUAL,height)
             }
         );
     }
     return graph;
 }
 
-Element GraphUtils::PlotBarGraph(const std::vector<std::pair<std::string, double>>& data,
+ftxui::Element GraphUtils::PlotBarGraph(const std::vector<std::pair<std::string, double>>& data,
                                 const std::string& title){
 
 
-    ftxui::Element bars;        
-    
+    ftxui::Elements bars;
+
     if(!title.empty()){
         bars.push_back(text(title)|bold|center);
         bars.push_back(separator());
     }
 
-    if(data.empty()){
-        bars.push_back(text("No data available")|center);
-        return vbos(bars)|border;
+    if(!data.empty()){
+        return vbox(
+        {
+                text(title)|bold|center,
+                separator(),
+                text("No data available")|center
+            }
+        ) | border;
     }
-
     double max_val=0;
     for const auto& pair:data){
         if(pair.second>max_val) max_val=pair.second;
@@ -95,16 +99,19 @@ Element GraphUtils::PlotBarGraph(const std::vector<std::pair<std::string, double
             hbox(
                 {
                     text(label+":")|flex(1),
-                    gauge(ratio)|color(Color::Green)|flex(3),
+                    gauge(static_cast<float>(ratio))|color(value >= 0 ? ftxui::Color::Green : ftxui::Color::Red)|flex(3),
                     text(" "+std::to_string(static_cast<int>(value)))|flex(1)
                 }
             )
         );
     }
-        
-    return vbox(bars)|border;
-        
-                        
+
+    return vbox({
+        text(title) | bold | center,
+        separator(),
+        vbox(std::move(bars))
+    }) | border;
+
 }
 
 
@@ -131,3 +138,18 @@ ftxui::Element GraphUtils::PlotPriceMovement(const std::vector<double>& prices,c
         })
     })|border;
 }
+
+ftxui::Element PlotPositionSizes(const std::unordered_map<std::string,double>& positions){
+    std::vector<std::pair<std::string,double>> data;
+    for(auto const& [instr,amt]:positions){
+        data.push_back({instr,amt});
+    }
+    return PlotBarGraph(data,"Current Positions");
+}
+
+ftxui::Element GraphUtils::PlotOrderSizeDistribution(const std::vector<double>& order_sizes){
+    return PlotLineGraph(order_sizes,"Order Size Distribution",50,8);
+
+}
+
+
